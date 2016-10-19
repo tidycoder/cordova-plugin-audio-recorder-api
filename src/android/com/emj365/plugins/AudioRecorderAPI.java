@@ -16,12 +16,17 @@ import java.io.FileInputStream;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.cordova.CordovaInterface;
+import org.apache.cordova.LOG;
+import android.content.pm.PackageManager;
+
 public class AudioRecorderAPI extends CordovaPlugin {
 
   private MediaRecorder myRecorder;
   private String outputFile;
   private CountDownTimer countDowntimer;
-
+  private CallbackContext callbackContext;
+  private static final String LOG_TAG = "CordovaPermissionHelper";
 
   public void onRequestPermissionResult(int requestCode, String[] permissions,
                                         int[] grantResults) throws JSONException
@@ -125,6 +130,7 @@ public class AudioRecorderAPI extends CordovaPlugin {
 
   @Override
   public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
+    this.callbackContext = callbackContext;
     Context context = cordova.getActivity().getApplicationContext();
     Integer seconds;
     if (args.length() >= 1) {
