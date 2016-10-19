@@ -95,7 +95,7 @@ public class AudioRecorderAPI extends CordovaPlugin {
           LOG.d(LOG_TAG, "No need to request permissions " + Arrays.toString(permissions));
 
           // Notify the plugin that all were granted by using more reflection
-          deliverPermissionResult(plugin, requestCode, permissions);
+          // deliverPermissionResult(plugin, requestCode, permissions);
       } catch (IllegalAccessException illegalAccessException) {
           // Should never be caught; this is a public method
           LOG.e(LOG_TAG, "IllegalAccessException when requesting permissions " + Arrays.toString(permissions), illegalAccessException);
