@@ -16,6 +16,11 @@ import java.io.FileInputStream;
 import java.io.File;
 import java.io.IOException;
 
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.LOG;
 import android.content.pm.PackageManager;
@@ -27,6 +32,8 @@ public class AudioRecorderAPI extends CordovaPlugin {
   private CountDownTimer countDowntimer;
   private CallbackContext callbackContext;
   private static final String LOG_TAG = "CordovaPermissionHelper";
+  public static final int PERMISSION_DENIED_ERROR = 20;
+  private Integer seconds = 10;
 
   public void onRequestPermissionResult(int requestCode, String[] permissions,
                                         int[] grantResults) throws JSONException
@@ -67,7 +74,7 @@ public class AudioRecorderAPI extends CordovaPlugin {
       });
       return;
     }
-    countDowntimer = new CountDownTimer(seconds * 1000, 1000) {
+    countDowntimer = new CountDownTimer(this.seconds * 1000, 1000) {
       public void onTick(long millisUntilFinished) {}
       public void onFinish() {
         stopRecord(callbackContext);
@@ -132,16 +139,15 @@ public class AudioRecorderAPI extends CordovaPlugin {
   public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
     this.callbackContext = callbackContext;
     Context context = cordova.getActivity().getApplicationContext();
-    Integer seconds;
     if (args.length() >= 1) {
-      seconds = args.getInt(0);
+      this.seconds = args.getInt(0);
     } else {
-      seconds = 7;
+      this.seconds = 7;
     }
     if (action.equals("record")) {
-      if(!this.hasPermission(this, permissions[0])) {
+      if(!this.hasPermission(this, "android.permission.RECORD_AUDIO")) {
         String[] permissions = {   };
-        this.requestPermission(this, 0, new String[] {"android.permission.RECORD_AUDIO"});
+        this.requestPermissions(this, 0, new String[] {"android.permission.RECORD_AUDIO"});
       } else {
         this.record();
       }
