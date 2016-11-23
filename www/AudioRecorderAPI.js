@@ -21,4 +21,8 @@ AudioRecorderAPI.install = function () {
   return window.plugins.audioRecorderAPI;
 };
 
+AudioRecorderAPI.prototype.checkPermission = function (successCallback, errorCallback) {
+    cordova.exec(successCallback, errorCallback, "AudioRecorderAPI", "checkPermission");
+};
+
 cordova.addConstructor(AudioRecorderAPI.install);

@@ -108,4 +108,49 @@
   }
 }
 
+// Delegate for camera permission UIAlertView
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    // If Settings button (on iOS 8), open the settings app
+    if (buttonIndex == 1) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wtautological-pointer-compare"
+        if (&UIApplicationOpenSettingsURLString != NULL) {
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+        }
+
+#pragma clang diagnostic pop
+    } 
+
+}
+
+- (void)checkPermission:(CDVInvokedUrlCommand*)command {
+      __weak AudioRecorderAPI* weakSelf = self;
+    self.currentCallbackId = command.callbackId;
+
+    if ([[AVAudioSession sharedInstance] respondsToSelector:@selector(requestRecordPermission:)]){
+
+       [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+           if (granted) {
+              CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+              [self.commandDelegate sendPluginResult:result callbackId:self.currentCallbackId];
+           }else {
+               dispatch_async(dispatch_get_main_queue(), ^{
+            [[[UIAlertView alloc] initWithTitle:[[NSBundle mainBundle]
+                                                objectForInfoDictionaryKey:@"CFBundleDisplayName"]
+                                                message:NSLocalizedString(@"Access to the audio has been prohibited; please enable it in the Settings app to continue.", nil)
+                                                delegate:weakSelf
+                                                cancelButtonTitle:NSLocalizedString(@"OK", nil)
+                                                otherButtonTitles:NSLocalizedString(@"Setting", nil), nil] show];
+               });
+               CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+               [self.commandDelegate sendPluginResult:result callbackId:self.currentCallbackId];
+           }
+       }];
+
+    }
+
+  }
+
+
 @end
