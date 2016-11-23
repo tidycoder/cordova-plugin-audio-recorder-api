@@ -187,7 +187,6 @@ public class AudioRecorderAPI extends CordovaPlugin {
           callbackContext.error(e.getMessage());
         }
       });
-      return false;
     }
 
     countDowntimer = new CountDownTimer(this.seconds * 1000, 1000) {
