@@ -35,7 +35,6 @@ public class AudioRecorderAPI extends CordovaPlugin {
   private CallbackContext callbackContext;
   private static final String LOG_TAG = "CordovaPermissionHelper";
   public static final int PERMISSION_DENIED_ERROR = 20;
-  private Integer seconds = 10;
 
   @Override
   public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
