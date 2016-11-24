@@ -46,14 +46,7 @@ public class AudioRecorderAPI extends CordovaPlugin {
       this.seconds = 7;
     }
     if (action.equals("record")) {
-      if(!this.hasPermission(this, "android.permission.RECORD_AUDIO")) {
-        String[] permissions = {   };
-        this.requestPermissions(this, 0, new String[] {"android.permission.RECORD_AUDIO"});
-      } else {
         this.record();
-      }
-
- 
       return true;
     }
 
@@ -64,7 +57,15 @@ public class AudioRecorderAPI extends CordovaPlugin {
     }
 
     if (action.equals("checkPermission")) {
-      callbackContext.success();
+      Boolean has = this.hasPermission(this, "android.permission.RECORD_AUDIO");
+      if(!has) {
+        this.requestPermissions(this, 0, new String[] {"android.permission.RECORD_AUDIO"});
+        PluginResult r = new PluginResult(PluginResult.Status.NO_RESULT);
+        r.setKeepCallback(true);
+        callbackContext.sendPluginResult(r);
+      } else {
+        callbackContext.success();
+      }
       return true;
     }
 
@@ -165,7 +166,7 @@ public class AudioRecorderAPI extends CordovaPlugin {
           return;
         }
       }
-      this.record();
+    this.callbackContext.success();
   }
 
   public void record() {
@@ -182,16 +183,20 @@ public class AudioRecorderAPI extends CordovaPlugin {
     myRecorder.setAudioEncodingBitRate(32000);
     myRecorder.setOutputFile(outputFile);
 
-    try {
-      myRecorder.prepare();
-      myRecorder.start();
-    } catch (final Exception e) {
       cordova.getThreadPool().execute(new Runnable() {
         public void run() {
-          callbackContext.error(e.getMessage());
+          try {
+          myRecorder.prepare();
+          myRecorder.start();
+          } catch (final Exception e) {
+            cordova.getThreadPool().execute(new Runnable() {
+              public void run() {
+                callbackContext.error(e.getMessage());
+              }
+            });
+          }
         }
       });
-    }
 
     countDowntimer = new CountDownTimer(this.seconds * 1000, 1000) {
       public void onTick(long millisUntilFinished) {
@@ -206,22 +211,35 @@ public class AudioRecorderAPI extends CordovaPlugin {
 
 
   private void stopRecord(final CallbackContext callbackContext) {
-    myRecorder.stop();
-    myRecorder.release();
-    cordova.getThreadPool().execute(new Runnable() {
-      public void run() {
-        try {
-          callbackContext.success(composeCallback());
-        } catch (JSONException e) {
-          callbackContext.error(e.getMessage());
+    try {
+      myRecorder.stop();
+      myRecorder.release();
+      cordova.getThreadPool().execute(new Runnable() {
+        public void run() {
+          try {
+            callbackContext.success(composeCallback());
+          } catch (JSONException e) {
+            callbackContext.error(e.getMessage());
+          }
         }
-      }
-    });
+      });
+    } catch (Exception e) {
+      LOG.e(LOG_TAG, e.toString());
+    }
   }
-
+  
   private JSONObject composeCallback() throws JSONException {
-    String json = "{ path: '" + outputFile + "', duration: " + duration + " }";
-    return new JSONObject(json);
+    File f = new File(outputFile);
+    if(f.exists())
+    {
+      String json = "{ path: '" + outputFile + "', duration: " + duration + " }";
+      return new JSONObject(json);
+    }
+    else
+    {
+      String json = "{ path: '', duration: 0 }";
+      return new JSONObject(json);
+    }
   }
 
 }
