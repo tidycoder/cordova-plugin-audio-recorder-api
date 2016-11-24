@@ -63,6 +63,11 @@ public class AudioRecorderAPI extends CordovaPlugin {
       return true;
     }
 
+    if (action.equals("checkPermission")) {
+      callbackContext.success();
+      return true;
+    }
+
     if (action.equals("playback")) {
       MediaPlayer mp = new MediaPlayer();
       mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
