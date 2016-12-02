@@ -230,7 +230,7 @@ public class AudioRecorderAPI extends CordovaPlugin {
   
   private JSONObject composeCallback() throws JSONException {
     File f = new File(outputFile);
-    if(f.exists())
+    if(f.exists() && f.length() > 0)
     {
       String json = "{ path: '" + outputFile + "', duration: " + duration + " }";
       return new JSONObject(json);
