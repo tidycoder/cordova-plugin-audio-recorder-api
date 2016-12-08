@@ -12,6 +12,8 @@ import android.media.AudioManager;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.content.Context;
+
+import java.util.Date;
 import java.util.UUID;
 import java.io.FileInputStream;
 import java.io.File;
@@ -35,23 +37,23 @@ public class AudioRecorderAPI extends CordovaPlugin {
   private CallbackContext callbackContext;
   private static final String LOG_TAG = "CordovaPermissionHelper";
   public static final int PERMISSION_DENIED_ERROR = 20;
+  private long lastBeginRecord = 0L;
 
   @Override
   public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
     Context context = cordova.getActivity().getApplicationContext();
     this.callbackContext = callbackContext;
-    if (args.length() >= 1) {
-      this.seconds = args.getInt(0);
-    } else {
-      this.seconds = 7;
-    }
     if (action.equals("record")) {
-        this.record();
+      if (args.length() >= 1) {
+        this.seconds = args.getInt(0);
+      } else {
+        this.seconds = 7;
+      }
+      this.record();
       return true;
     }
 
     if (action.equals("stop")) {
-      countDowntimer.cancel();
       stopRecord(callbackContext);
       return true;
     }
@@ -186,6 +188,7 @@ public class AudioRecorderAPI extends CordovaPlugin {
       // cordova.getThreadPool().execute(new Runnable() {
       //   public void run() {
           try {
+            lastBeginRecord = (new Date()).getTime();
           myRecorder.prepare();
           myRecorder.start();
           } catch (final Exception e) {
@@ -212,6 +215,9 @@ public class AudioRecorderAPI extends CordovaPlugin {
 
   private void stopRecord(final CallbackContext callbackContext) {
     try {
+      long curTime = (new Date()).getTime();
+      if (curTime - lastBeginRecord < 1000) return;
+      countDowntimer.cancel();
       myRecorder.stop();
       myRecorder.release();
       cordova.getThreadPool().execute(new Runnable() {
