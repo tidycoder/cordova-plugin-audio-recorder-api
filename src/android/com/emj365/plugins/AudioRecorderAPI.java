@@ -183,8 +183,8 @@ public class AudioRecorderAPI extends CordovaPlugin {
     myRecorder.setAudioEncodingBitRate(32000);
     myRecorder.setOutputFile(outputFile);
 
-      cordova.getThreadPool().execute(new Runnable() {
-        public void run() {
+      // cordova.getThreadPool().execute(new Runnable() {
+      //   public void run() {
           try {
           myRecorder.prepare();
           myRecorder.start();
@@ -195,8 +195,8 @@ public class AudioRecorderAPI extends CordovaPlugin {
               }
             });
           }
-        }
-      });
+      //   }
+      // });
 
     countDowntimer = new CountDownTimer(this.seconds * 1000, 1000) {
       public void onTick(long millisUntilFinished) {
