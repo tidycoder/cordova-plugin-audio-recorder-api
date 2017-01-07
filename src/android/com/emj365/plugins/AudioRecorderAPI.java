@@ -41,6 +41,7 @@ public class AudioRecorderAPI extends CordovaPlugin {
 
   @Override
   public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
+    this.callbackContext = callbackContext;
     Context context = cordova.getActivity().getApplicationContext();
     this.callbackContext = callbackContext;
     if (action.equals("record")) {
